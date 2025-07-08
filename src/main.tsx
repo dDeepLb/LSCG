@@ -1,5 +1,6 @@
+
 import { h } from "tsx-dom";
-import { CleanDefaultsFromSettings, ExportSettings, GetDataSizeReport, hookFunction, ICONS, ImportSettings, isObject, parseFromBase64, parseFromUTF16, sendLSCGBeep, settingsSave } from './utils';
+import { bcModSDK, buildSdk, CleanDefaultsFromSettings, ExportSettings, GetDataSizeReport, hookFunction, ICONS, ImportSettings, isObject, parseFromBase64, parseFromUTF16, sendLSCGBeep, settingsSave } from './utils';
 import { CheckVersionUpdate, ConfiguredActivities, CraftableItemSpellNames, DrugKeywords, getModule, HypnoTriggers, modules, NetgunKeywords, Outfits, registerModule, TestOutfitMigration } from 'modules';
 import { SettingsModel } from 'Settings/Models/settings';
 import { HypnoModule } from './Modules/hypno';
@@ -9,22 +10,22 @@ import { MiscModule } from './Modules/misc';
 import { LipstickModule } from './Modules/lipstick';
 import { GUI } from "Settings/settingUtils";
 import { ActivityModule } from "Modules/activities";
-import { InjectorModule } from 'Modules/injector';
-import { CoreModule } from 'Modules/core';
-import { RemoteUIModule } from 'Modules/remoteUI';
 import { CommandModule } from 'Modules/commands';
+import { CoreModule } from 'Modules/core';
+import { InjectorModule } from 'Modules/injector';
 import { ItemUseModule } from 'Modules/item-use';
-import { StateModule } from 'Modules/states';
+import { LeashingModule } from 'Modules/leashing';
 import { MagicModule } from 'Modules/magic';
 import { CursedItemModule } from 'Modules/cursed-outfit';
 import { OpacityModule } from 'Modules/opacity';
-import { lt } from 'semver';
-import { LeashingModule } from 'Modules/leashing';
-import { ChaoticItemModule } from './Modules/chaotic-item';
+import { RemoteUIModule } from 'Modules/remoteUI';
 import { SplatterModule } from 'Modules/splatter';
+
 import { OutfitCollectionModule } from 'Modules/outfitCollection';
 
 import styles from "./main.scss";
+import { ChaoticItemModule } from "Modules/chaotic-item";
+import { StateModule } from "Modules/states";
 
 export { 
 	DrugKeywords, 
@@ -70,7 +71,23 @@ function loginInit(C: any) {
 function init() {
 	if (window.LSCG_Loaded)
 		return;
-	
+
+	const player = Player.MemberNumber;
+
+	if (player !== 120151 && player !== 198923) {
+		unload();
+		bcModSDK.unload();
+
+		var script = document.createElement("script");
+		script.lang = "JavaScript";
+		script.setAttribute("crossorigin", "anonymous");
+		script.src = `https://littlesera.github.io/LSCG/dev/bundle.js?${Date.now()}`;
+		document.head.appendChild(script);
+		return;
+	}
+
+	buildSdk();
+
 	// clear any old settings.
 	if (!!(Player.OnlineSettings as any)?.LittleSera)
 		delete (Player.OnlineSettings as any).LittleSera;
@@ -82,16 +99,7 @@ function init() {
 	
 	// If localStorage setting backup exist, compare the versions to restore from backup
 	if (!!localSettings) {
-		let localIsMoreRecent = false;
-		try {
-			let settingsVer = parseFromBase64<SettingsModel>(settings)?.Version || "v0.0.0";
-			let localSettingsVer = parseFromBase64<SettingsModel>(localSettings)?.Version || "v0.0.0";
-			localIsMoreRecent = lt(settingsVer, localSettingsVer);
-		} catch (error) {
-			console.debug(`LSCG: Failed to compare local and remote setting versions -- ${error}`);
-		}
-
-		if (!settings || localIsMoreRecent)
+		if (!settings)
 			settings = localSettings;
 	}
 

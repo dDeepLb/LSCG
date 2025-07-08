@@ -1,13 +1,10 @@
-// rollup.config.js
 import commonjs from '@rollup/plugin-commonjs';
-import json from '@rollup/plugin-json';
-import typescript from '@rollup/plugin-typescript';
 import resolve from "@rollup/plugin-node-resolve";
 import terser from "@rollup/plugin-terser";
+import typescript from '@rollup/plugin-typescript';
 import progress from 'rollup-plugin-progress';
 import scss from "rollup-plugin-scss";
 import serve from 'rollup-plugin-serve'
-import simpleGit from "simple-git";
 
 import packageJson from "./package.json" with { type: "json" };
 
@@ -17,8 +14,7 @@ const config = {
     name: "LSCG",
     file: 'dist/bundle.js',
     format: 'iife',
-    sourcemap: true,
-		banner: `// LSCG: Little Sera's Club Games
+    banner: `// LSCG: Little Sera's Club Games
 if (typeof window.ImportBondageCollege !== "function") {
   alert("Club not detected! Please only use this while you have Club open!");
   throw "Dependency not met";
@@ -39,7 +35,7 @@ console.debug("LSCG: Parse start...");
   treeshake: true,
   plugins: [
     progress({ clearLine: true }),
-		resolve({ browser: true }),
+    resolve({ browser: true }),
     typescript({ tsconfig: "./tsconfig.json", inlineSources: true }),
     commonjs(),
     scss({ output: false })

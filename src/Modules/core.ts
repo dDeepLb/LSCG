@@ -3,12 +3,10 @@ import { getModule, modules } from "modules";
 import { BaseSettingsModel, GlobalSettingsModel } from "Settings/Models/base";
 import { IPublicSettingsModel, PublicSettingsModel, SettingsModel } from "Settings/Models/settings";
 import { ModuleCategory } from "Settings/setting_definitions";
-import { removeAllHooksByModule, hookFunction, getCharacter, drawSvg, SVG_ICONS, sendLSCGMessage, settingsSave, LSCG_CHANGES, LSCG_SendLocal, mouseTooltip } from "../utils";
-import { HypnoModule } from "./hypno";
+import { CUSTOM_LSCG_VERSION, drawSvg, getCharacter, hookFunction, LSCG_CHANGES, LSCG_SendLocal, mouseTooltip, removeAllHooksByModule, sendLSCGMessage, settingsSave, SVG_ICONS } from "../utils";
 import { CollarModule } from "./collar";
 import { CursedItemModule } from "./cursed-outfit";
 
-//import * as semver from "semver";
 import { lt } from "semver";
 import { BaseMigrator } from "./Migrators/BaseMigrator";
 import { StateMigrator } from "./Migrators/StateMigrator";
@@ -20,9 +18,10 @@ import { OpacityMigrator } from "./Migrators/OpacityMigrator";
 import { SuggestionSettingMigrator } from "./Migrators/SuggestionSettingMigrator";
 import { OutfitMigrator } from "./Migrators/OutfitMigrator";
 import { CursedItemMigrator } from "./Migrators/CursedItemMigrator";
+import { HypnoModule } from "./hypno";
 
 // >= R111
-declare var DialogMenuMapping: { items: ScreenFunctions & { C: null | Character } };
+declare var DialogMenuMapping: { items: ScreenFunctions & { C: null | Character; }; };
 
 // Core Module that can handle basic functionality like server handshakes etc.
 export class CoreModule extends BaseModule {
@@ -38,7 +37,7 @@ export class CoreModule extends BaseModule {
     get publicSettings(): IPublicSettingsModel {
         var settings = new PublicSettingsModel();
         for (const m of modules()) {
-            var moduleSettings = m.settings ?? <BaseSettingsModel>{enabled:false};
+            var moduleSettings = m.settings ?? <BaseSettingsModel>{ enabled: false };
             var moduleSettingStorage = m.settingsStorage ?? "";
             if (Object.hasOwn(settings, moduleSettingStorage)) {
                 var publicModuleSetting = (<any>settings)[moduleSettingStorage];
@@ -53,15 +52,15 @@ export class CoreModule extends BaseModule {
     }
 
     get settingsStorage(): string | null {
-		return "GlobalModule";
-	}
+        return "GlobalModule";
+    }
 
     get settings(): GlobalSettingsModel {
         return super.settings as GlobalSettingsModel;
-	}
+    }
 
     get defaultSettings(): GlobalSettingsModel | null {
-		return <GlobalSettingsModel>{
+        return <GlobalSettingsModel>{
             enabled: false,
             blockSettingsWhileRestrained: false,
             edgeBlur: false,
@@ -69,7 +68,7 @@ export class CoreModule extends BaseModule {
             sharePublicCrafting: false,
             showCheckRolls: true
         };
-	}
+    }
 
     load(): void {
         hookFunction("ChatRoomSync", 1, (args, next) => {
@@ -101,11 +100,11 @@ export class CoreModule extends BaseModule {
             const ModUser = !!Char?.LSCG;
             const Friend = C.ID === 0 || (Player.FriendList ?? []).includes(C.MemberNumber!);
             const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
-            const isAdmin = (Array.isArray(ChatRoomData?.Admin) && ChatRoomData?.Admin.includes(C.MemberNumber!))
+            const isAdmin = (Array.isArray(ChatRoomData?.Admin) && ChatRoomData?.Admin.includes(C.MemberNumber!));
             if (ModUser && ChatRoomHideIconState === 0 && !Ghosted) {
-                var version = C.IsPlayer() ? LSCG_VERSION : (C as OtherCharacter).LSCG?.Version;
+                var version = C.IsPlayer() ? CUSTOM_LSCG_VERSION() : (C as OtherCharacter).LSCG?.Version;
                 var starColor = isAdmin ? "#008080" : "#00AEAE";
-                if (version != LSCG_VERSION)
+                if (!C.IsPlayer() && version != LSCG_VERSION)
                     starColor = "#ff4545";
                 drawSvg(MainCanvas, SVG_ICONS.STAR, CharX + 400 * Zoom, CharY + 8 * Zoom, 40 * Zoom, 40 * Zoom, 50, 0.8, 1, starColor);
                 if (MouseIn(CharX + 385 * Zoom, CharY + 3 * Zoom, 50 * Zoom, 50 * Zoom)) {
@@ -201,16 +200,16 @@ export class CoreModule extends BaseModule {
             }, ModuleCategory.Core);
 
             hookFunction("DrawItemPreview", 1, (args, next) => {
-                    const ret = next(args);
-                    const [item, , x, y] = args;
-                    if (item) {
-                        const { Craft } = item;
-                        if (MouseIn(x, y, DialogInventoryGrid.itemWidth, DialogInventoryGrid.itemHeight) && Craft && Craft?.MemberNumber) {
-                            drawTooltip(1000, y - 140, 975, `Crafted By: ${Craft.MemberName} [${Craft.MemberNumber}]`, "left");
-                        }
+                const ret = next(args);
+                const [item, , x, y] = args;
+                if (item) {
+                    const { Craft } = item;
+                    if (MouseIn(x, y, DialogInventoryGrid.itemWidth, DialogInventoryGrid.itemHeight) && Craft && Craft?.MemberNumber) {
+                        drawTooltip(1000, y - 140, 975, `Crafted By: ${Craft.MemberName} [${Craft.MemberNumber}]`, "left");
                     }
-                    return ret;
                 }
+                return ret;
+            }
             );
 
             hookFunction("DialogClick", 1, (args, next) => {
@@ -271,6 +270,9 @@ export class CoreModule extends BaseModule {
 
         let saveRequired = false;
         this.Migrators.forEach(m => {
+            // if (false) {
+            //     saveRequired = saveRequired || m.Migrate(fromVersion);
+            // }
             if (lt(fromVersion, m.Version)) {
                 saveRequired = m.Migrate(fromVersion) || saveRequired;
             }
@@ -281,7 +283,7 @@ export class CoreModule extends BaseModule {
 
     SendPublicPacket(replyRequested: boolean, type: LSCGMessageModelType = "init") {
         sendLSCGMessage(<LSCGMessageModel>{
-            version: LSCG_VERSION,
+            version: 'Goddess',
             type: type,
             settings: this.publicSettings,
             target: null,
