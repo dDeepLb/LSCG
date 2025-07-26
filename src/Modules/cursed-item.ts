@@ -75,9 +75,9 @@ export class CursedItemModule extends BaseModule {
             if (!craft) {
                 return next([idPrefix, asset, C, onClick, options, ...args]);
             }
-            let isCursed = this.cursedKeywords.some(str => isPhraseInString(GetItemNameAndDescriptionConcat(asset) ?? "", str));
+            let isCursed = this.cursedKeywords.some(str => isPhraseInString(GetItemNameAndDescriptionConcat(asset) ?? "", str, true));
             let myCursedItemNames = this.settings.CursedItems.map(item => item.Name);
-            isCursed &&= myCursedItemNames.some(str => isPhraseInString(GetItemNameAndDescriptionConcat(asset) ?? "", str));
+            isCursed &&= myCursedItemNames.some(str => isPhraseInString(GetItemNameAndDescriptionConcat(asset) ?? "", str, true));
 
             options ??= {};
             options.icons = [
@@ -117,11 +117,11 @@ export class CursedItemModule extends BaseModule {
         if (!this.Enabled) return;
         // Iterate through Player.Appearance, look for crafted items that contain "cursed" keywords, then compare against our current active outfits.
         // If new items are found, ping the crafting owner for the full outfit code and add as active
-        let allItems = Player.Appearance.filter(item => this.cursedKeywords.some(str => isPhraseInString(GetItemNameAndDescriptionConcat(item) ?? "", str)));
+        let allItems = Player.Appearance.filter(item => this.cursedKeywords.some(str => isPhraseInString(GetItemNameAndDescriptionConcat(item) ?? "", str, true)));
         if (allItems.length > 0) {
             let activeItems = this.spreadingState.ActiveOutfits ?? [];
-            let newItems = allItems.filter(item => !activeItems.some(active => active.Crafter == item.Craft?.MemberNumber && isPhraseInString(GetItemNameAndDescriptionConcat(item) ?? "", active.ItemName)));
-            newItems.forEach(item => this.SendCursedItemRequest(item))
+            let newItems = allItems.filter(item => !activeItems.some(active => active.Crafter == item.Craft?.MemberNumber && isPhraseInString(GetItemNameAndDescriptionConcat(item) ?? "", active.ItemName, true)));
+            newItems.forEach(item => this.SendCursedItemRequest(item));
         }
     }
 
@@ -130,6 +130,8 @@ export class CursedItemModule extends BaseModule {
         if (target <= 0) return;
         let bundle = toItemBundle(item, Player);
         if (!bundle) return;
+
+        console.debug(`Sending cursed item request: ${target} -- ${JSON.stringify(bundle)}`);
 
         sendLSCGCommandBeep(target, "cursed-item-request", [{
             name: "item",
@@ -190,12 +192,13 @@ export class CursedItemModule extends BaseModule {
         let bundle = msg.command?.args.find(a => a.name == "item")?.value as ItemBundle;
         if (!bundle) return;
         let itemStr = GetItemNameAndDescriptionConcat(bundle) ?? "";
-        let foundItem = this.settings.CursedItems.find(item => item.Enabled && isPhraseInString(itemStr, item.Name))
+        let foundItem = this.settings.CursedItems.find(item => item.Enabled && isPhraseInString(itemStr, item.Name, true))
         if (!!foundItem)
             this.SendCursedItemResponse(sender, bundle, foundItem);
     }
 
     HandleCursedItemResponse(sender: number, msg: LSCGMessageModel) {
+        console.debug(`Receiving cursed item response: ${sender} -- ${JSON.stringify(msg.command)}`);
         let item = msg.command?.args.find(a => a.name == "item")?.value as CursedItemWorn;
         if (!this.Enabled || !item || !this.spreadingState.checkItemIsValid(item)) return;
         this.spreadingState.AddCursedItem(item, sender);

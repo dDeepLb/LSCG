@@ -16,7 +16,7 @@ import { InjectorModule } from 'Modules/injector';
 import { ItemUseModule } from 'Modules/item-use';
 import { LeashingModule } from 'Modules/leashing';
 import { MagicModule } from 'Modules/magic';
-import { CursedItemModule } from 'Modules/cursed-outfit';
+import { CursedItemModule } from 'Modules/cursed-item';
 import { OpacityModule } from 'Modules/opacity';
 import { RemoteUIModule } from 'Modules/remoteUI';
 import { SplatterModule } from 'Modules/splatter';

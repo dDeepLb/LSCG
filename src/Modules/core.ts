@@ -5,7 +5,7 @@ import { IPublicSettingsModel, PublicSettingsModel, SettingsModel } from "Settin
 import { ModuleCategory } from "Settings/setting_definitions";
 import { CUSTOM_LSCG_VERSION, drawSvg, getCharacter, hookFunction, LSCG_CHANGES, LSCG_SendLocal, mouseTooltip, removeAllHooksByModule, sendLSCGMessage, settingsSave, SVG_ICONS } from "../utils";
 import { CollarModule } from "./collar";
-import { CursedItemModule } from "./cursed-outfit";
+import { CursedItemModule } from "./cursed-item";
 
 import { lt } from "semver";
 import { BaseMigrator } from "./Migrators/BaseMigrator";
@@ -66,7 +66,8 @@ export class CoreModule extends BaseModule {
             edgeBlur: false,
             seeSharedCrafts: true,
             sharePublicCrafting: false,
-            showCheckRolls: true
+            showCheckRolls: true,
+            blockDOGS: false
         };
     }
 
