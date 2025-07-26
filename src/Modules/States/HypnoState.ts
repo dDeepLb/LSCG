@@ -161,7 +161,8 @@ export class HypnoState extends BaseState {
         var eyes1 = InventoryGet(Player, "Eyes");
         var eyes2 = InventoryGet(Player, "Eyes2");
 
-        let hypnoEyeColors = hypnoSettings.hypnoEyeColor?.split(",") || hypnoSettings.hypnoEyeColor;
+        let hypnoEyeColors = hypnoSettings.hypnoEyeColor?.split(",").map((x) => x.trim()) || hypnoSettings.hypnoEyeColor;
+        console.log(hypnoEyeColors);
         if (!!eyes1) {
             eyes1.Asset = eyeAsset1 ?? eyes1.Asset;
             eyes1.Color = hypnoEyeColors ?? "#A2A2A2";
