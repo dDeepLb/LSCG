@@ -1,6 +1,6 @@
 import { h } from "tsx-dom";
 import { ApplyItem, GetDataSizeReport, hookFunction, ICONS, isBind, isBody, isCloth, isCosplay, isGenitals, isHair, isPronouns, isSkin, parseFromBase64, smartGetAssetGroup } from "utils";
-import { GuiSubscreen } from "./settingBase";
+import { GuiSubscreen, HelpInfo } from "./settingBase";
 import { OutfitSettings } from "./Models/base";
 import { OutfitCollectionModule } from "Modules/outfitCollection";
 import styles from "./outfits.scss";
@@ -145,6 +145,13 @@ export class GuiOutfits extends GuiSubscreen {
 	get outfitModule(): OutfitCollectionModule {
 		return this.module as OutfitCollectionModule;
 	}
+
+    get help(): HelpInfo {
+        return {
+            label: 'Open Outfit Collection Wiki on GitHub',
+            link: 'https://github.com/littlesera/LSCG/wiki/Outfit-Collection'
+        }
+    }
 
     OrderedKeys(): string[] {
         return this.outfitModule.data.GetOutfitNames().sort((a,b) => a.toLocaleLowerCase().localeCompare(b.toLocaleLowerCase()));
@@ -355,6 +362,7 @@ export class GuiOutfits extends GuiSubscreen {
 
     charHook: (() => void) | undefined;
 
+    _prevResize: any;
     Load(): void {
         CommonPhotoMode = true;
         this.charHook = hookFunction("CharacterGetCurrent", 1, (args, next) => {
@@ -376,6 +384,7 @@ export class GuiOutfits extends GuiSubscreen {
         }
         
         this.#updateElements();
+        this._prevResize = CurrentScreenFunctions.Resize;
         CurrentScreenFunctions.Resize = (load) => this.Resize(load);
         CurrentScreenFunctions.Resize(true);
     }
@@ -419,6 +428,7 @@ export class GuiOutfits extends GuiSubscreen {
         DialogMenuMapping.items.Unload();
         if (!!this.charHook) this.charHook();
         CommonPhotoMode = false;
+        CurrentScreenFunctions.Resize = this._prevResize;
         super.Exit();
     }
 

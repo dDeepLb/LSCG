@@ -623,8 +623,7 @@ export function IsIncapacitated(C?: OtherCharacter | PlayerCharacter): boolean {
 		hypnotized = ((C.LSCG.HypnoModule as any).hypnotized ?? false) || ((C.LSCG.InjectorModule as any).brainwashed ?? false);
 		asleep = (C.LSCG.InjectorModule as any).asleep ?? false;
 	}
-	return hypnotized || asleep || paralyzed;
-	// || getModule<MiscModule>("MiscModule")?.isChloroformed; -- Need to push chloroform status to public for this to work.
+	return hypnotized || asleep || paralyzed;	
 }
 
 export function GetMetadata(data: ServerChatRoomMessage): LSCGChatRoomMessageMetadata | undefined {
@@ -695,6 +694,11 @@ export function smartGetAssetGroup(item: Item | Asset | AssetGroup | AssetGroupN
 		return undefined;
 	}
 	return group;
+}
+
+export function isProtectedFromRemoval(item: Item | Asset | AssetGroup | AssetGroupName) {
+	const group = smartGetAssetGroup(item);
+	return group?.Name === "BodyStyle";
 }
 
 export function isCloth(item: Item | Asset | AssetGroup | AssetGroupName, allowCosplay: boolean = false, includeUnderwear: boolean = true): boolean {
@@ -1014,6 +1018,7 @@ export function CanApplyLock(C: Character, acting: MemberNumber, lock: Item): bo
 export function RemoveItem(item: Item, acting: number, C?: Character) {
 	if (!C) C = Player;
 	if (isCosplay(item) && !canChangeCosplay(acting, C)) return;
+	if (isProtectedFromRemoval(item)) return;
 	if (CanUnlock(acting, C, item) || item.Asset.Group.IsAppearance()) InventoryRemove(C, item.Asset.Group.Name, false);
 }
 
@@ -1027,6 +1032,8 @@ export function ApplyItem(item: ItemBundle, acting: number, replace: boolean = t
 	let newItem = InventoryWear(C, item.Name, item.Group, item.Color, item.Difficulty, acting, item.Craft, false);
 	if (!!newItem) {
 		newItem.Property = item.Property;
+		if ((<any>C).LSCG?.GlobalModule?.blockDOGS && (<any>newItem.Property)?.["Name"] == "DeviousPadlock") // REMOVE DOGS LOCKS ON APPLY
+			delete (<any>newItem.Property)["Name"];
 		let lock = InventoryGetLock(newItem);
 		if (!!lock && locksafe && (!InventoryDoesItemAllowLock(newItem) || !CanApplyLock(C, acting, lock))) {
 			InventoryUnlock(C, newItem, false);
@@ -1039,6 +1046,19 @@ export function canChangeCosplay(acting: number, C: Character): boolean {
 	return C.OnlineSharedSettings?.BlockBodyCosplay !== true || acting == Player.MemberNumber;
 }
 
+export function getBCXData(): any {
+	try {
+		return parseFromBase64(Player.ExtensionSettings.BCX.split(":")[1]);
+	}
+	catch (e) { return undefined; }
+}
+
+export function getBCXActiveCurseSlots(): AssetGroupName[] {
+	let bcxCurses = getBCXData()?.conditions?.curses?.conditions;
+	if (!bcxCurses) return [];
+	return (Object.keys(bcxCurses).filter(key => bcxCurses[key]?.active ?? false)) as AssetGroupName[];
+}
+
 /**
  * Checks whether the player is able to unlock the provided item on the provided character
  * @param {Character} C - The character on whom the item is equipped
@@ -1047,6 +1067,7 @@ export function canChangeCosplay(acting: number, C: Character): boolean {
  */
 export function CanUnlock(acting: number, acted: Character, Item: Item | undefined) {
 	if (!Item) return false;
+	if (!InventoryGetLock(Item)) return true; // Always return true if item is not actually locked
 	if ((!acted.IsPlayer()) && !acted.CanInteract()) return false;
 	if ((Item != null) && (Item.Property != null) && (Item.Property.LockedBy === "ExclusivePadlock")) return (!acted.IsPlayer());
 	if (LogQuery("KeyDeposit", "Cell")) return false;
