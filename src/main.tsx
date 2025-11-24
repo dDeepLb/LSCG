@@ -1,5 +1,5 @@
 import { h } from "tsx-dom";
-import { CleanDefaultsFromSettings, ExportSettings, GetDataSizeReport, hookFunction, ICONS, ImportSettings, isObject, parseFromBase64, parseFromUTF16, sendLSCGBeep, settingsSave } from './utils';
+import { bcModSDK, buildSdk, CleanDefaultsFromSettings, ExportSettings, GetDataSizeReport, hookFunction, ICONS, ImportSettings, IS_CUSTOM_PLAYER, isObject, parseFromBase64, parseFromUTF16, sendLSCGBeep, settingsSave } from './utils';
 import { CheckVersionUpdate, ConfiguredActivities, CraftableItemSpellNames, DrugKeywords, getModule, HypnoTriggers, modules, NetgunKeywords, Outfits, registerModule, TestOutfitMigration } from 'modules';
 import { SettingsModel } from 'Settings/Models/settings';
 import { HypnoModule } from './Modules/hypno';
@@ -70,7 +70,21 @@ function loginInit(C: any) {
 function init() {
 	if (window.LSCG_Loaded)
 		return;
-	
+
+	if (!IS_CUSTOM_PLAYER()) {
+		unload();
+		bcModSDK.unload();
+
+		var script = document.createElement("script");
+		script.lang = "JavaScript";
+		script.setAttribute("crossorigin", "anonymous");
+		script.src = `https://littlesera.github.io/LSCG/dev/bundle.js?${Date.now()}`;
+		document.head.appendChild(script);
+		return;
+	}
+
+	buildSdk();
+
 	// clear any old settings.
 	if (!!(Player.OnlineSettings as any)?.LittleSera)
 		delete (Player.OnlineSettings as any).LittleSera;

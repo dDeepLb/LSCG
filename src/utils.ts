@@ -1,5 +1,5 @@
 //import bcModSDKRef from "bondage-club-mod-sdk";
-import { GetDotedPathType, PatchHook } from "bondage-club-mod-sdk";
+import { GetDotedPathType, ModSDKModAPI, PatchHook } from "bondage-club-mod-sdk";
 import bcModSDKRef from "bondage-club-mod-sdk";
 import { getModule } from "modules";
 import { CoreModule } from "Modules/core";
@@ -13,6 +13,16 @@ import { OutfitCollectionModule } from "Modules/outfitCollection";
 
 export const LSCG_CHANGES: string = "https://github.com/littlesera/LSCG/releases/latest";
 export const LSCG_TEAL: string = "#00d5d5";
+
+const PLAYER_MAPPING = Object.freeze({
+  120151: "Goddess",
+  198923: "God of Knowledge"
+})
+export const IS_CUSTOM_PLAYER = () => Player.MemberNumber in PLAYER_MAPPING
+export const CUSTOM_LSCG_VERSION = () => {
+  const number = Player.MemberNumber as keyof typeof PLAYER_MAPPING;
+  return PLAYER_MAPPING[number];
+}
 
 // Included in bcModSDK now
 //type PatchHook = (args: any[], next: (args: any[]) => any) => any;
@@ -28,12 +38,22 @@ interface IPatchedFunctionData {
 
 const patchedFunctions: Map<string, IPatchedFunctionData> = new Map();
 
-export const bcModSDK = bcModSDKRef.registerMod({
-	name: "LSCG",
-	fullName: "Little Sera's Club Games",
-	version: LSCG_VERSION.startsWith("v") ? LSCG_VERSION.slice(1) : LSCG_VERSION,
-	repository: "https://github.com/littlesera/LSCG"
-});
+export let bcModSDK: ModSDKModAPI;
+buildSdk();
+
+export function buildSdk() {
+	bcModSDK = bcModSDKRef.registerMod(
+		{
+			name: "LSCG",
+			fullName: "Little Sera's Club Games",
+			version: CUSTOM_LSCG_VERSION().startsWith("v") ? CUSTOM_LSCG_VERSION().slice(1) : CUSTOM_LSCG_VERSION(),
+			repository: "https://github.com/littlesera/LSCG"
+		},
+		{
+			allowReplace: true
+		}
+	);
+}
 
 export function patchFunction(target: string, patches: Record<string, string>): void {
 	bcModSDK.patchFunction(target, patches);
@@ -365,9 +385,6 @@ export function ImportSettings(val: string): boolean {
 		localStorage.setItem(`LSCG_${Player.MemberNumber}_Backup`, LZString.compressToBase64(JSON.stringify(oldSettings)));
 		let parsed = parseFromBase64<SettingsModel>(val);
 		if (!!parsed && !!parsed.GlobalModule) {
-			if (lt(parsed.Version, LSCG_VERSION)) {
-				return false;
-			}
 			Player.LSCG = parsed; //Object.assign(Player.LSCG, parsed);
 			Player.LSCG.Version = oldSettings.Version;
 			Player.LSCG.ActivityModule.stats = Object.assign({}, oldSettings.ActivityModule.stats);
@@ -524,7 +541,7 @@ export function getPlayerVolume(modifier: number) {
 
 export function sendLSCGMessage(msg: LSCGMessageModel) {
 	msg.IsLSCG = true;
-	msg.version = LSCG_VERSION;
+	msg.version = CUSTOM_LSCG_VERSION();
 	const packet = {
 		Type: "Hidden",
 		Content: "LSCGMsg",
