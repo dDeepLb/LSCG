@@ -55,7 +55,7 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         description: "Induces a deep slumber in the target.",
         allowRandom: true,
         apply: ({ magic, sender, duration }) => {
-            SendAction("%NAME% succumbs to the spell's overwhelming pressure, %POSSESSIVE% eyes closing as %PRONOUN% falls unconscious.");
+            SendAction("%NAME% sighs and succumbs to the spell's pressure, %POSSESSIVE% eyes closing as %PRONOUN% falls unconscious.");
             magic.stateModule.SleepState.Activate(sender?.MemberNumber, duration);
         },
     },
@@ -65,7 +65,7 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         description: "Arouses the target.",
         allowRandom: true,
         apply: ({ magic, sender, duration }) => {
-            magic.stateModule.GaggedState.Active ? SendAction("A blush runs into %NAME%'s cheeks uncontrollably.") : SendAction("A moan escapes %NAME%'s lips uncontrollably.");
+            magic.stateModule.GaggedState.Active ? SendAction("%NAME%'s feels uncontrollable arousal raising.") : SendAction("A moan escapes %NAME%'s lips uncontrollably.");
             magic.stateModule.HornyState.Activate(sender?.MemberNumber, duration);
         },
     },
@@ -105,7 +105,7 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         description: "Petrifies the target.",
         allowRandom: true,
         apply: ({ magic, sender, duration }) => {
-            SendAction("%NAME%'s eyes widen in a panic as %POSSESSIVE% muscles seize in place.");
+            SendAction("%NAME%'s gaze expresses indifference as %POSSESSIVE% muscles seize in place.");
             magic.stateModule.FrozenState.Activate(sender?.MemberNumber, duration);
         },
     },
@@ -146,13 +146,13 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         allowRandom: true,
         apply: ({ magic, sender, paired, duration }) => {
             if (!!paired && !!sender) {
-                SendAction("%NAME% squirms as %POSSESSIVE% arousal is paired.");
+                SendAction("%NAME% gaze expresses slight interest as %POSSESSIVE% arousal is paired.");
                 magic.stateModule.ArousalPairedState.DoPair(paired, sender, duration);
                 magic.NotifyPair(sender, paired, LSCGSpellEffect.paired_arousal, magic.stateModule.ArousalPairedState.Type);
             }
         },
         applyPaired: ({ magic, sender }, originalTarget) => {
-            SendAction("%NAME% squirms as %POSSESSIVE% arousal is paired.");
+            SendAction("%NAME% gaze expresses slight interest as %POSSESSIVE% arousal is paired.");
             magic.stateModule.ArousalPairedState.RespondToPairing(originalTarget, sender);
         },
     },
@@ -165,8 +165,8 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         apply: ({ magic, sender, paired, duration }) => {
             if (!!paired && !!sender) {
                 magic.stateModule.GaggedState.Active ?
-                    SendAction("%NAME% quivers as %PRONOUN% feels %POSSESSIVE% impending denial.") :
-                    SendAction("%NAME% whimpers as %PRONOUN% feels %POSSESSIVE% impending denial.");
+                    SendAction("%NAME% gaze expresses frustration as %PRONOUN% feels %POSSESSIVE% impending denial.") :
+                    SendAction("%NAME% frowns as %PRONOUN% feels %POSSESSIVE% impending denial.");
                 magic.stateModule.OrgasmSiphonedState.DoPair(paired, sender, duration);
                 magic.NotifyPair(sender, paired, LSCGSpellEffect.orgasm_siphon, magic.stateModule.OrgasmSiphonedState.Type);
             }
@@ -185,8 +185,8 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         apply: ({ magic, sender, spell, duration }) => {
             if (spell.Outfit?.Code) {
                 magic.stateModule.GaggedState.Active ?
-                    SendAction("%NAME% trembles as %POSSESSIVE% clothing shimmers and morphs around %INTENSIVE%.") :
-                    SendAction("%NAME% squeaks as %POSSESSIVE% clothing shimmers and morphs around %INTENSIVE%.");
+                    SendAction("%NAME% sighs as %POSSESSIVE% clothing shimmers and morphs around %INTENSIVE%.") :
+                    SendAction("%NAME% tsks as %POSSESSIVE% clothing shimmers and morphs around %INTENSIVE%.");
                 magic.stateModule.RedressedState.Apply(spell, sender?.MemberNumber, duration);
             }
         },
@@ -200,8 +200,8 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         apply: ({ magic, sender, spell, duration }) => {
             if (spell.Polymorph?.Code) {
                 magic.stateModule.GaggedState.Active ?
-                    SendAction("%NAME% trembles as %POSSESSIVE% body shimmers and morphs.") :
-                    SendAction("%NAME% squeaks as %POSSESSIVE% body shimmers and morphs.");
+                    SendAction("%NAME% sighs as %POSSESSIVE% body shimmers and morphs.") :
+                    SendAction("%NAME% tsks as %POSSESSIVE% body shimmers and morphs.");
                 magic.stateModule.PolymorphedState.Apply(spell, sender?.MemberNumber, duration);
             }
         },
@@ -213,7 +213,7 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         beneficial: true,
         allowRandom: true,
         apply: ({ magic }) => {
-            SendAction("%NAME% gasps, blinking as any magic affecting %INTENSIVE% is removed.");
+            SendAction("%NAME% sighs as any magic affecting %INTENSIVE% is removed.");
             magic.stateModule.Clear(false, true);
         },
     },
@@ -224,7 +224,7 @@ export const BUILTIN_SPELL_EFFECTS: SpellEffectDefinition[] = [
         beneficial: true,
         allowRandom: true,
         apply: ({ magic, sender, duration }) => {
-            SendAction("%NAME% blinks with a grin.");
+            SendAction("%NAME% blinks slowly, getting unique insights.");
             magic.stateModule.XRayState.Activate(sender?.MemberNumber, duration);
         },
     },

@@ -1,3 +1,4 @@
+import { CUSTOM_LSCG_VERSION } from 'utils';
 import { BaseSettingsModel, GlobalPublicSettingsModel, GlobalSettingsModel, LeashingPublicSettingsModel, LipstickSettingsModel, MapSettingsModel, MiscSettingsModel, OpacityPublicSettingsModel, OpacitySettingsModel, OutfitSettings, SplatterSettingsModel } from "./base";
 import { CollarModel, CollarPublicSettingsModel, CollarSettingsModel } from "./collar";
 import { HypnoPublicSettingsModel, HypnoSettingsModel } from "./hypno";
@@ -57,7 +58,7 @@ export interface IPublicSettingsModel extends BaseSettingsModel {
 
 export class PublicSettingsModel implements IPublicSettingsModel {
     enabled: boolean = false;
-    Version: string = LSCG_VERSION;
+    Version: string = CUSTOM_LSCG_VERSION();
     ExtensionData: Record<string, unknown> = {};
     CollarModule: CollarPublicSettingsModel = <CollarPublicSettingsModel>{
         enabled: false,
