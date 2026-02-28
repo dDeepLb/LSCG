@@ -3,7 +3,7 @@ import { getModule, modules } from "modules";
 import { BaseSettingsModel, GlobalSettingsModel } from "Settings/Models/base";
 import { IPublicSettingsModel, PublicSettingsModel, SettingsModel } from "Settings/Models/settings";
 import { ModuleCategory } from "Settings/setting_definitions";
-import { removeAllHooksByModule, hookFunction, getCharacter, drawSvg, SVG_ICONS, sendLSCGMessage, settingsSave, LSCG_CHANGES, LSCG_SendLocal, mouseTooltip } from "../utils";
+import { CUSTOM_LSCG_VERSION, removeAllHooksByModule, hookFunction, getCharacter, drawSvg, SVG_ICONS, sendLSCGMessage, settingsSave, LSCG_CHANGES, LSCG_SendLocal, mouseTooltip } from "../utils";
 import { HypnoModule } from "./hypno";
 import { CollarModule } from "./collar";
 import { CursedItemModule } from "./cursed-item";
@@ -104,9 +104,9 @@ export class CoreModule extends BaseModule {
             const Ghosted = (Player.GhostList ?? []).includes(C.MemberNumber!);
             const isAdmin = (Array.isArray(ChatRoomData?.Admin) && ChatRoomData?.Admin.includes(C.MemberNumber!))
             if (ModUser && ChatRoomHideIconState === 0 && !Ghosted) {
-                var version = C.IsPlayer() ? LSCG_VERSION : (C as OtherCharacter).LSCG?.Version;
+                var version = C.IsPlayer() ? CUSTOM_LSCG_VERSION() : (C as OtherCharacter).LSCG?.Version;
                 var starColor = isAdmin ? "#008080" : "#00AEAE";
-                if (version != LSCG_VERSION)
+                if (!C.IsPlayer() && version != LSCG_VERSION)
                     starColor = "#ff4545";
                 drawSvg(MainCanvas, SVG_ICONS.STAR, CharX + 400 * Zoom, CharY + 8 * Zoom, 40 * Zoom, 40 * Zoom, 50, 0.8, 1, starColor);
                 if (MouseIn(CharX + 385 * Zoom, CharY + 3 * Zoom, 50 * Zoom, 50 * Zoom)) {

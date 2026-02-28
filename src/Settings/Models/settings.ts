@@ -1,3 +1,4 @@
+import { CUSTOM_LSCG_VERSION } from 'utils';
 import { BoopsModule } from "Modules/boops";
 import { InjectorModule } from "Modules/injector";
 import { BaseSettingsModel, GlobalPublicSettingsModel, GlobalSettingsModel, LipstickSettingsModel, MapSettingsModel, MiscSettingsModel, OpacityPublicSettingsModel, OpacitySettingsModel, OutfitSettings, SplatterSettingsModel } from "./base";
@@ -53,7 +54,7 @@ export interface IPublicSettingsModel extends BaseSettingsModel {
 
 export class PublicSettingsModel implements IPublicSettingsModel {
     enabled: boolean = false;
-    Version: string = LSCG_VERSION;
+    Version: string = CUSTOM_LSCG_VERSION();
     CollarModule: CollarPublicSettingsModel = <CollarPublicSettingsModel>{
         enabled: false,
         chokeLevel: 0,

@@ -683,7 +683,7 @@ export class HypnoModule extends BaseModule {
     }
 
     TriggerRestoreTimeout() {
-        SendAction("%NAME% gasps, blinking and blushing with confusion.");
+        SendAction("%NAME% gasps, blinking with confusion.");
         this.TriggerRestore();
     }
 
